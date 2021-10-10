@@ -257,7 +257,7 @@ router.post('/echarts5',function (req,res,next) {
 
     model.connect(function (db,client) {
             db.collection("timelinecao").find({textno:articletitle}).toArray(function (err,ret) {
-                console.log("echarts5的："+ret)
+                // console.log("echarts5的："+ret)
                 if(err){
                     console.log("出现了一些小小的错误!")
                 }else{
@@ -279,10 +279,10 @@ router.post('/echarts5',function (req,res,next) {
                     }
                     Date.push(temp);
                 }
-                console.log("包裹",Date);
-                console.log("这是时间戳",timestamp);
-                console.log("这是贡献度",contributions);
-                console.log("这是作者",authors);
+                // console.log("包裹",Date);
+                // console.log("这是时间戳",timestamp);
+                // console.log("这是贡献度",contributions);
+                // console.log("这是作者",authors);
                 res.json(Date);
             })
     })
@@ -347,15 +347,29 @@ router.post('/echartsoftalkstimeline',function (req,res,next) {
             if(err){
                 console.log("出现了一些错误!")
             }else{
+                var Date=[];
                 var authors=ret[0].authors;
                 var timeline=[];
                 var talkstimes=[];
+                timeline.push("时间轴")
                 for(var i=0;i<ret.length;i++){
                     timeline.push(ret[i].timestamp);
                     talkstimes.push(ret[i].talks)
                 }
+                Date.push(timeline);
+                for (var i=0;i<authors.length;i++){
+                    var temp=[];
+                    temp.push(String(authors[i]));
+                    for (var j=0;j<talkstimes.length;j++){
+                        temp.push(talkstimes[j][i]);
+                    }
+                    Date.push(temp);
+                }
+
+                res.json(Date);
                 console.log("timeline的结果是:",timeline);
-                console.log("talktimes的结果是:",logintimes);
+                console.log("talktimes的结果是:",talkstimes);
+                console.log("打包后的结果是:",Date);
             }
         })
     })
@@ -367,15 +381,29 @@ router.post('/echartsoflogintimestimeline',function (req,res,next) {
             if(err){
                 console.log("出现了一些错误!")
             }else{
+                var Date=[];
                 var authors=ret[0].authors;
                 var timeline=[];
                 var logintimes=[];
-                for(var i=0;i<ret.length;i++){
+                timeline.push("时间轴");
+                for(var i=0;i<ret.length;i++) {
                     timeline.push(ret[i].timestamp);
                     logintimes.push(ret[i].logintimes)
                 }
-                console.log("timeline的结果是:",timeline);
-                console.log("logintimes的结果是:",logintimes);
+                Date.push(timeline);
+                for (var i=0;i<authors.length;i++){
+                    var temp=[];
+                    temp.push(String(authors[i]));
+                    for (var j=0;j<logintimes.length;j++){
+                        temp.push(logintimes[j][i]);
+                    }
+                    Date.push(temp);
+                }
+
+                res.json(Date);
+                // console.log("打包后结果:",Date);
+                // console.log("timeline的结果是:",timeline);
+                // console.log("logintimes的结果是:",logintimes);
             }
         })
     })

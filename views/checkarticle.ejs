@@ -108,6 +108,10 @@
         <button onclick="javascript:window.location.href='/teacher/allowstudenttoshow?type='+'6y'+'&data=<%=JSON.stringify(data)%>'" >禁止学生端显示修改次数的可视化图表</button>
         <div class="chart" style="height: 700px;width: 1000px" id="recognization"></div>
         <button onclick="javascript:window.location.href='/teacher/allowstudenttoshow?type='+'6n'+'&data=<%=JSON.stringify(data) %>'">允许学生端显示该可视化图表</button>
+<!--        时间轴——登陆情况-->
+        <div class="chart" style="height: 700px;width: 1000px" id="timelinelogintimes"></div>
+        <!--        时间轴——交流情况-->
+        <div class="chart" style="height: 700px;width: 1000px" id="timelinetalks"></div>
     </div>
 </div>
 </body>
@@ -172,7 +176,7 @@
         method:"POST",
         dataType:"json",
         success:function (data) {
-            console.log(data);
+            // console.log(data);
             var option = {
                 xAxis: {
                     type: 'category',
@@ -265,7 +269,7 @@
         dataType:"json",
         success:function (data) {
             database=data;
-            console.log(database);
+            // console.log(database);
             for (var i=1;i<database[0].length;i++){
                 database[0][i]=database[0][i].slice(5,19).replace(/T/," ");
             }
@@ -422,6 +426,207 @@
                 ]
             };
             mychart4.setOption(option)
+        }
+    })
+//timeline-login
+    var myChart_timelinelogintimes = echarts.init(document.getElementById("timelinelogintimes"));
+    var option_timelinelogintimes;
+    var database_timelinelogintimes;
+
+    $.ajax({
+        url:"/echarts/echartsoflogintimestimeline?textno=<%=data.textno%>&groupno=<%=data.groupno%>",
+        method:"POST",
+        dataType:"json",
+        success:function (data) {
+            database_timelinelogintimes=data;
+            console.log("_timelinelogintimes:"+database_timelinelogintimes);
+            for (var i=1;i<database_timelinelogintimes[0].length;i++){
+                database_timelinelogintimes[0][i]=database_timelinelogintimes[0][i].slice(5,19).replace(/T/," ");
+            }
+            setTimeout(function () {
+                option_timelinelogintimes = {
+                    title: {
+                        text: '时间轴/登陆次数',
+                        top: 'bottom',
+                        left: 'right'
+                    },
+                    legend: {},
+                    tooltip: {
+                        trigger: 'axis'
+                        // showContent: false
+                    },
+                    dataset: {
+                        source: database_timelinelogintimes
+                    },
+                    xAxis: {type: 'category',
+                        min: 'dataMin',
+                        max: 'dataMax',
+                        splitLine: {
+                            show: true
+                        }},
+                    yAxis: {gridIndex: 0},
+                    dataZoom: [
+                        {
+                            type: 'slider',
+                            show: true,
+                            xAxisIndex: [0],
+                            start: 1,
+                            end: 99
+                        }
+                    ],
+                    grid: {top: '55%'},
+                    series: [
+                    ]
+                };
+
+                myChart_timelinelogintimes.on('updateAxisPointer', function (event) {
+                    var xAxisInfo = event.axesInfo[0];
+                    if (xAxisInfo) {
+                        var dimension = xAxisInfo.value + 1;
+                        myChart_timelinelogintimes.setOption({
+                            series: {
+                                id: 'pie',
+                                label: {
+                                    formatter: '{@'+0+'}:'+'登陆次数'+'{@'+dimension+'}'+'次'+'({d}%)'
+                                },
+                                encode: {
+                                    value: dimension,
+                                    tooltip: dimension
+                                }
+                            }
+                        });
+                    }
+                });
+                for (var i=0;i<database_timelinelogintimes.length-1;i++){
+                    var temp ={type: 'line', smooth: true, seriesLayoutBy: 'row', emphasis: {focus: 'series'},stack:'all'}
+                    option_timelinelogintimes.series.push(temp)
+                }
+                var temp={
+                    type: 'pie',
+                    id: 'pie',
+                    radius: '30%',
+                    center: ['50%', '25%'],
+                    emphasis: {focus: 'data'},
+                    label: {
+                        formatter: '{@'+0+'}:'+'共修改文章'+'{@'+1+'}'+'次'+'({d}%)'
+                    },
+                    encode: {
+                        itemName: '稿子',
+                        value: 1,
+                        tooltip: 1
+                    }
+                }
+                option_timelinelogintimes.series.push(temp)
+                myChart_timelinelogintimes.setOption(option_timelinelogintimes);
+
+            });
+
+            if (option_timelinelogintimes && typeof option_timelinelogintimes === 'object') {
+                myChart_timelinelogintimes.setOption(option_timelinelogintimes);
+            }
+        }
+    })
+
+//timeline-talk
+    var myChart_timelinetalks = echarts.init(document.getElementById("timelinetalks"));
+    var option_timelinetalks;
+    var database_timelinetalks;
+
+    $.ajax({
+        url:"/echarts/echartsoflogintimestimeline?textno=<%=data.textno%>&groupno=<%=data.groupno%>",
+        method:"POST",
+        dataType:"json",
+        success:function (data) {
+            database_timelinetalks=data;
+            console.log("_timelinetalks:"+database_timelinetalks);
+            for (var i=1;i<database_timelinetalks[0].length;i++){
+                database_timelinetalks[0][i]=database_timelinetalks[0][i].slice(5,19).replace(/T/," ");
+            }
+            setTimeout(function () {
+                option_timelinetalks = {
+                    title: {
+                        text: '时间轴/交谈次数',
+                        top: 'bottom',
+                        left: 'right'
+                    },
+                    legend: {},
+                    tooltip: {
+                        trigger: 'axis'
+                        // showContent: false
+                    },
+                    dataset: {
+                        source: database_timelinetalks
+                    },
+                    xAxis: [{type: 'category',
+                        min: 'dataMin',
+                        max: 'dataMax',
+                        splitLine: {
+                            show: true
+                        }},{type: 'category',
+                        min: 'dataMin',
+                        max: 'dataMax',
+                        splitLine: {
+                            show: true
+                        }},
+                    ],
+                    yAxis: [{gridIndex: 0},
+                            {gridIndex: 0}],
+                    dataZoom: [
+                        {
+                            type: 'slider',
+                            show: true,
+                            xAxisIndex: [0],
+                            start: 1,
+                            end: 99
+                        }
+                    ],
+                    grid: {top: '55%'},
+                    series: [
+                    ]
+                };
+
+                myChart_timelinetalks.on('updateAxisPointer', function (event) {
+                    var xAxisInfo = event.axesInfo[0];
+                    if (xAxisInfo) {
+                        var dimension = xAxisInfo.value + 1;
+                        console.log("时间轴登陆次数"+database_timelinetalks[0][dimension])
+                        myChart_timelinetalks.setOption({
+                            series: {
+                                id: 'bar',
+                                encode: {
+                                    itemName: '稿子',
+                                    y:dimension
+                                }
+                            }
+                        });
+                    }
+                });
+                for (var i=0;i<database_timelinetalks.length-1;i++){
+                    var temp ={type: 'line', smooth: true, seriesLayoutBy: 'row', emphasis: {focus: 'series'},stack:'all'}
+                    option_timelinetalks.series.push(temp)
+                }
+                var temp={
+                            yAxisIndex:0,
+                            xAxisIndex:1,
+                            type: 'bar',
+                            id:'bar',
+                            showBackground: true,
+                            backgroundStyle: {
+                                color: 'rgba(180, 180, 180, 0.2)'
+                            },
+                            encode: {
+                                itemName: '稿子',
+                                y:1,
+                            }
+                }
+                option_timelinetalks.series.push(temp)
+                myChart_timelinetalks.setOption(option_timelinetalks);
+
+            });
+
+            if (option_timelinetalks && typeof option_timelinetalks === 'object') {
+                myChart_timelinetalks.setOption(option_timelinetalks);
+            }
         }
     })
 </script>
